@@ -1,0 +1,46 @@
+2018-08-15 19:18:48 base.py[line:433] INFO Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2018-08-15 19:18:48 base.py[line:867] INFO Added job "get_basic_info" to job store "default"
+2018-08-15 19:18:48 base.py[line:159] INFO Scheduler started
+2018-08-15 19:18:50 base.py[line:123] INFO Running job "get_basic_info (trigger: cron[second='*/5'], next run at: 2018-08-15 19:18:50 CST)" (scheduled at 2018-08-15 19:18:50+08:00)
+2018-08-15 19:18:50 base.py[line:144] INFO Job "get_basic_info (trigger: cron[second='*/5'], next run at: 2018-08-15 19:18:55 CST)" executed successfully
+2018-08-15 19:18:55 base.py[line:123] INFO Running job "get_basic_info (trigger: cron[second='*/5'], next run at: 2018-08-15 19:18:55 CST)" (scheduled at 2018-08-15 19:18:55+08:00)
+2018-08-15 19:18:55 base.py[line:144] INFO Job "get_basic_info (trigger: cron[second='*/5'], next run at: 2018-08-15 19:19:00 CST)" executed successfully
+2018-08-15 19:19:50 base.py[line:433] INFO Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2018-08-15 19:19:50 base.py[line:867] INFO Added job "get_basic_info" to job store "default"
+2018-08-15 19:19:50 base.py[line:159] INFO Scheduler started
+2018-08-15 19:19:55 base.py[line:123] INFO Running job "get_basic_info (trigger: cron[second='*/5'], next run at: 2018-08-15 19:19:55 CST)" (scheduled at 2018-08-15 19:19:55+08:00)
+2018-08-15 19:19:56 base.py[line:131] ERROR Job "get_basic_info (trigger: cron[second='*/5'], next run at: 2018-08-15 19:20:00 CST)" raised an exception
+Traceback (most recent call last):
+  File "D:\SoftwareInstall\Anaconda3\lib\site-packages\apscheduler\executors\base.py", line 125, in run_job
+    retval = job.func(*job.args, **job.kwargs)
+  File "D:/WorkSpace/学习期/Python/LoadDataSchedule/Schedule/scheduler_jobs.py", line 18, in get_basic_info
+    basic_info.run()
+  File "D:\WorkSpace\学习期\Python\LoadDataSchedule\WindLoad\LoadDataClasses\stocksBasicInfo.py", line 192, in run
+    winddata = self.getBasicInfoByWss(stockslist, today)
+  File "D:\WorkSpace\学习期\Python\LoadDataSchedule\WindLoad\LoadDataClasses\stocksBasicInfo.py", line 45, in getBasicInfoByWss
+    raise ValueError(basicOptions_with_day,': getBasicInfoByWss basic failed...')
+ValueError: ('tradeDate=2018-08-15;industryType=1;industryStandard=5', ': getBasicInfoByWss basic failed...')
+2018-08-15 19:20:00 base.py[line:123] INFO Running job "get_basic_info (trigger: cron[second='*/5'], next run at: 2018-08-15 19:20:00 CST)" (scheduled at 2018-08-15 19:20:00+08:00)
+2018-08-15 19:20:00 base.py[line:131] ERROR Job "get_basic_info (trigger: cron[second='*/5'], next run at: 2018-08-15 19:20:05 CST)" raised an exception
+Traceback (most recent call last):
+  File "D:\SoftwareInstall\Anaconda3\lib\site-packages\apscheduler\executors\base.py", line 125, in run_job
+    retval = job.func(*job.args, **job.kwargs)
+  File "D:/WorkSpace/学习期/Python/LoadDataSchedule/Schedule/scheduler_jobs.py", line 18, in get_basic_info
+    basic_info.run()
+  File "D:\WorkSpace\学习期\Python\LoadDataSchedule\WindLoad\LoadDataClasses\stocksBasicInfo.py", line 192, in run
+    winddata = self.getBasicInfoByWss(stockslist, today)
+  File "D:\WorkSpace\学习期\Python\LoadDataSchedule\WindLoad\LoadDataClasses\stocksBasicInfo.py", line 45, in getBasicInfoByWss
+    raise ValueError(basicOptions_with_day,': getBasicInfoByWss basic failed...')
+ValueError: ('tradeDate=2018-08-15;industryType=1;industryStandard=5', ': getBasicInfoByWss basic failed...')
+2018-08-15 19:20:05 base.py[line:123] INFO Running job "get_basic_info (trigger: cron[second='*/5'], next run at: 2018-08-15 19:20:05 CST)" (scheduled at 2018-08-15 19:20:05+08:00)
+2018-08-15 19:20:05 base.py[line:131] ERROR Job "get_basic_info (trigger: cron[second='*/5'], next run at: 2018-08-15 19:20:10 CST)" raised an exception
+Traceback (most recent call last):
+  File "D:\SoftwareInstall\Anaconda3\lib\site-packages\apscheduler\executors\base.py", line 125, in run_job
+    retval = job.func(*job.args, **job.kwargs)
+  File "D:/WorkSpace/学习期/Python/LoadDataSchedule/Schedule/scheduler_jobs.py", line 18, in get_basic_info
+    basic_info.run()
+  File "D:\WorkSpace\学习期\Python\LoadDataSchedule\WindLoad\LoadDataClasses\stocksBasicInfo.py", line 192, in run
+    winddata = self.getBasicInfoByWss(stockslist, today)
+  File "D:\WorkSpace\学习期\Python\LoadDataSchedule\WindLoad\LoadDataClasses\stocksBasicInfo.py", line 45, in getBasicInfoByWss
+    raise ValueError(basicOptions_with_day,': getBasicInfoByWss basic failed...')
+ValueError: ('tradeDate=2018-08-15;industryType=1;industryStandard=5', ': getBasicInfoByWss basic failed...')
