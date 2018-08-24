@@ -18,23 +18,24 @@ from odps import ODPS
 class WindStocksBasicInfo(WindBase):
     def __init__(self):
         w.start()
-        self.table_name = "zz_test"
-        self.folder = "D:\WorkSpace\DownloadData\BasicInfo"
+        # self.table_name = "zz_test"
+        self.table_name = "quant_stocks_basic_info"
+        # csv文件的路径，生成csv文件
+        self.folder = "D:\\WorkSpace\\DownloadData\\BasicInfo_schedule\\"
         # csv文件的路径，生成csv文件
         self.basicinfo_field = "marginornot,SHSC,riskwarning,industry2,industrycode"
         self.basic_options = "tradeDate=%s;industryType=1;industryStandard=5"
         self.margin_fields = "mrg_long_amt,mrg_long_repay,mrg_long_bal,mrg_short_vol,mrg_short_vol_repay,margin_saletradingamount,margin_salerepayamount,mrg_short_vol_bal,mrg_short_bal,mrg_bal"
         self.margin_fields_none = "None,None,None,None,None,None,None,None,None,None"
         self.margin_options = "unit=1;tradeDate=%s"
-        self.composition = {"1000000087000000", "1000000086000000", "1000000090000000", "a001030204000000",
+        self.composition = ["1000000087000000", "1000000086000000", "1000000090000000", "a001030204000000",
                        "1000000089000000", "1000008491000000", "1000012163000000", "a001050100000000",
-                       "a001050200000000"}
-        # csv文件的路径，生成csv文件
-        self.csvpath = "D:\\WorkSpace\\DownloadData\\BasicInfo_eachday\\"
+                       "a001050200000000"]
+
         self.comp_st_fields = ",compindex2-index1,compindex2-index2,compindex2-index3,compindex2-index4,compindex2-index5,compindex2-index6,compindex2-index7,is_ST,is_*ST"
 
-        if os.path.exists(self.csvpath) != True:
-            os.makedirs(self.csvpath)
+        if os.path.exists(self.folder) != True:
+            os.makedirs(self.folder)
 
 
     def getBasicInfoByWss(self, stocks, today):
@@ -45,7 +46,9 @@ class WindStocksBasicInfo(WindBase):
             raise ValueError(basicOptions_with_day,': getBasicInfoByWss basic failed...')
             sys.exit()
         print("Success: ", wss_basicdata.Times)
-        wss_basicdata_rotate = self.rotate(wss_basicdata.Data)
+        wss_basicdata_with_stocks = [wss_basicdata.Codes]
+        wss_basicdata_with_stocks.extend(wss_basicdata.Data)
+        wss_basicdata_rotate = self.rotate(wss_basicdata_with_stocks)
         # 获取融资融券数据
         margin_datas = [[None for i in range(10)] for j in range(len(stocks))]
         margin_stock_dict = self.getMarginDictFromBasicWss(stocks, wss_basicdata.Data[0])
@@ -58,8 +61,11 @@ class WindStocksBasicInfo(WindBase):
             margin_stock_dict_key = []
             for key in margin_stock_dict.keys():
                 margin_stock_dict_key.append(key)
+            #print("margin_stock_dict_key: ", margin_stock_dict_key)
             marginOptions_with_day = self.margin_options % today
+            #print("marginOptions_with_day: ", marginOptions_with_day)
             wss_margindata = w.wss(margin_stock_dict_key, self.margin_fields, marginOptions_with_day)
+            #print("wss_margindata: ", wss_margindata)
             if wss_margindata.ErrorCode != 0:
                 print(wss_margindata)
                 raise ValueError(marginOptions_with_day, ': getBasicInfoByWss margin failed...')
@@ -70,19 +76,24 @@ class WindStocksBasicInfo(WindBase):
                 key = wss_margindata.Codes[c]
                 t = margin_stock_dict.get(key)
                 margin_datas[t] = wss_margindata_rotate[c]
+                print("margindata 循环：", c, key, t, margin_datas[t])
         # basicInfo 连接融资融券的矩阵
         wss_basicdata_with_margin = np.hstack((wss_basicdata_rotate, margin_datas))
 
         # 将获取的指数和ST数据展示成是否，以矩阵形式展现
         comp_list_all = []
+        composition_data = self.getComptitionByWset(today)
+        #print("composition_data: ", composition_data)
         for stock in stocks:
             comp_list = []
-            for comp in self.getComptitionByWset(today):
+            for comp in composition_data:
                 if stock in comp:
                     comp_list.append("是")
                 else:
                     comp_list.append("否")
+                #print(stock, comp_list)
             comp_list_all.append(comp_list)
+            print("comptition: ", stock)
 
         # bisic 和融资融券信息，指数和ST信息合并成一个大矩阵
         wssdata_all = np.hstack((wss_basicdata_with_margin, comp_list_all))
@@ -97,6 +108,7 @@ class WindStocksBasicInfo(WindBase):
         for comp in self.composition:
             comp_options = "date=%s;sectorid=%s;field=wind_code" % (today, comp)
             comp_data = w.wset("sectorconstituent", comp_options)
+            #print(comp_data)
             if comp_data.ErrorCode != 0:
                 print(comp_data)
                 raise ValueError(today, ': getComptitionByWset failed...')
@@ -104,13 +116,12 @@ class WindStocksBasicInfo(WindBase):
             if comp_data.Data == []:
                 composition_data.append([])
             else:
-
                 composition_data.append(comp_data.Data[0])
         return composition_data
 
 
     # 获取有融资融券的stock list及其位置
-    def getMarginDictFromBasicWss(stocklist, datalist):
+    def getMarginDictFromBasicWss(self, stocklist, datalist):
         if len(stocklist) != len(datalist):
             print("融资融券的stock列表不对。。。。。")
         margin_dict = {}
@@ -121,7 +132,7 @@ class WindStocksBasicInfo(WindBase):
         # print("margin_dict: ", margin_dict)
         return margin_dict
 
-    def uploadToOdps(self, tablename, folder):
+    def uploadToOdps(self, filename):
         odps_basic = OdpsClient()
         # 创建schema
         columns = [Column(name='CODE', type='string', comment='代码'),
@@ -152,48 +163,50 @@ class WindStocksBasicInfo(WindBase):
                    Column(name='is_xST', type='string', comment='是否*ST')]
         partitions = [Partition(name='pt', type='string', comment='the partition报告日期')]
         schema = Schema(columns=columns, partitions=partitions)
-        odps_basic.create_table(tablename, schema)
-        table_name = odps_basic.get_table(tablename)
+        odps_basic.create_table(self.table_name, schema)
+        table_name = odps_basic.get_table(self.table_name)
 
-        for parent, dirnames, filenames in os.walk(folder):
-            break
         # 写入ODPS表
-        for filename in filenames:
-            print(filename)
-            pt_date = filename.strip(".csv")
-            partitions = "pt=" + pt_date
-            table_writer = table_name.open_writer(partition=partitions, create_partition=True)
-            # 读取csv文件数据写入table
-            with open(folder + filename, "r", encoding="utf-8") as csvfile:
-                # 读取csv文件，返回的是迭代类型
-                reader = csv.reader(csvfile)
-                columns = [row for row in reader]
-                # print("---增加记录数量：---", len(columns))
-                csvfile.close()
-                for column in columns[1:]:
-                    column_new = []
-                    column_new.append(column[0])
-                    column_new.extend(column[2:7])
-                    for col in column[7:17]:
-                        if (col == 'None' or col == '' or col == 'nan'):
-                            column_new.append(float("nan"))
-                        else:
-                            column_new.append(float(col))
-                    column_new.extend(column[17:])
-                    print("The row has to be written: ", column_new[0], column[1])
-                    table_writer.write(column_new)
-            table_writer.close()
+        print(filename)
+        pt_date = filename.strip(".csv")
+        partitions = "pt=" + pt_date
+        table_writer = table_name.open_writer(partition=partitions, create_partition=True)
+        # 读取csv文件数据写入table
+        with open(self.folder + filename, "r", encoding="utf-8") as csvfile:
+            # 读取csv文件，返回的是迭代类型
+            reader = csv.reader(csvfile)
+            columns = [row for row in reader]
+            # print("---增加记录数量：---", len(columns))
+            csvfile.close()
+            for column in columns[1:]: #columns[1:]
+                column_new = []
+                column_new.append(column[0])
+                column_new.extend(column[2:7])
+                for col in column[7:17]:
+                    if (col == 'None' or col == '' or col == 'nan'):
+                        column_new.append(float("nan"))
+                    else:
+                        column_new.append(float(col))
+                column_new.extend(column[17:])
+                print("The row has to be written: ", column_new[0], column[1])
+                table_writer.write(column_new)
+        table_writer.close()
 
 
     def run(self):
-        today = datetime.date.today()
-        if self.isTradeDay(today):
+        yesterday = datetime.date.today() - datetime.timedelta(1)
+        if self.isTradeDay(yesterday):
+            today = yesterday.strftime('%Y%m%d')
             stockslist = self.getAStocks(today)
+            # stockslist = ["300498.SZ", "000420.SZ"]
             winddata = self.getBasicInfoByWss(stockslist, today)
-            self.insertToCSV(winddata, today)
-            self.uploadToOdps(self.table_name, self.folder)
+            fields = self.basicinfo_field + "," + self.margin_fields + self.comp_st_fields
+            filename = self.createCSVFile(self.folder, today, fields)
+            self.insertNumpyToCSV(winddata, today, self.folder, filename)
+            self.uploadToOdps(today+".csv")
         else:
-            print(today, "--不是交易日，不需要获取数据...")
+            print(yesterday, "--不是交易日，不需要获取数据...")
+
     def runOnlyForTest(self):
         current_time = time.strftime('%Y-%m-%d %H:%M:%S',time.localtime())
         print("Execute runOnlyForTest: ", current_time)
@@ -203,3 +216,4 @@ if __name__ == "__main__":
     # 今天日期
     windclient = WindStocksBasicInfo()
     windclient.run()
+    # windclient.uploadToOdps("20180823.csv")

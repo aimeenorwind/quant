@@ -4,6 +4,8 @@ from apscheduler.events import EVENT_JOB_EXECUTED, EVENT_JOB_ERROR
 import datetime
 import logging
 from WindLoad.LoadDataClasses.stocksBasicInfo import WindStocksBasicInfo
+from WindLoad.LoadDataClasses.allStocksSecurities import WindAllStocksSecurities
+from WindLoad.LoadDataClasses.financeBalanceSheet import WindFinanceBalanceSheet
 from Common.send_mail import MailSend
 
 logging.basicConfig(level=logging.INFO,
@@ -13,10 +15,32 @@ logging.basicConfig(level=logging.INFO,
                     filemode="a")
 
 def get_basic_info():
-    print("Start getting basic info scheduler...")
+    """
+    基本资料：融资融券、指数成份&ST
+    :return:
+    """
+    print("Start getting basic info scheduler... 证券基本资料")
     basic_info = WindStocksBasicInfo()
     basic_info.run()
     # basic_info.runOnlyForTest()
+
+def get_securities_data():
+    """
+    基本资料获取：名称、上市&退市时间等
+    :return:
+    """
+    print("Start getting securities data... 证券名称及上市时间")
+    securites_data = WindAllStocksSecurities()
+    securites_data.run()
+
+def get_finance_Balance_sheet():
+    """
+    对比本地文件LatestReportDate.csv，获取出新财报的股票并获取上传
+    :return:
+    """
+    print("Start getting finance balance_sheet... 资产负债表")
+    balance_sheet = WindFinanceBalanceSheet()
+    balance_sheet.runwss()
 
 def my_listener(event):
     if event.exception:
@@ -29,9 +53,11 @@ def my_listener(event):
 
 # scheduler = BackgroundScheduler()
 scheduler = BlockingScheduler()
-
-# scheduler.add_job(func=get_basic_info, trigger="cron", day_of_week='tue-sat', hour=17, minute=00, id="get_basic_info_task")
+# 增加job
+# scheduler.add_job(func=get_basic_info, trigger="cron", day_of_week='tue-sat', hour=20, minute=00, id="get_basic_info_task")
 scheduler.add_job(func=get_basic_info, trigger="cron", second="*/5", id="cron_task")
+scheduler.add_job(func=get_securities_data, trigger="cron", second="*/8", id="cron_task")
+scheduler.add_job(func=get_finance_Balance_sheet, trigger="cron", second="*/8", id="cron_task")
 print("scheduler is defined...")
 scheduler._logger = logging
 scheduler.add_listener(my_listener, EVENT_JOB_EXECUTED | EVENT_JOB_ERROR)
