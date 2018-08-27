@@ -195,3 +195,29 @@ class WindBase():
         bfile.close()
         print(new_report_stock_dict)
         return new_report_stock_dict
+
+    def getDataByWss(self, stocklist, wssdate, fields, option, error_msg):
+        """
+        用wss获取数据的通用方法
+        :param stocklist: 获取日期当日的stock list
+        :param wssdate: 日期
+        :param fields: 是field的list，因为wss不能同时获取大量的field，需要分批获取
+        :param option: 使用wss的option，注意rptDate是%s，在函数内部进行替换
+        :param error_msg: 当wss获取失败时的提示信息
+        :return: 转置后的数据矩阵
+        """
+        print('\n\n' + '-----通过wss获取数据中-----' + '\n')
+        print(stocklist)
+        row_data = [stocklist]
+        tday = wssdate.strftime('%Y%m%d')
+        options_with_date = option % tday
+        for f in fields:
+            wssdata = w.wss(stocklist, f, options_with_date)
+            if wssdata.ErrorCode != 0:
+                print(wssdata)
+                raise ValueError(wssdata, error_msg)
+                sys.exit()
+            row_data.extend(wssdata.Data)
+        wssdata_rotate = self.rotate(row_data)
+
+        return wssdata_rotate

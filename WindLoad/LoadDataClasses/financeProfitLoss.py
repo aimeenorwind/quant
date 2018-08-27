@@ -164,5 +164,5 @@ class WindFinanceProfitLoss(WindBase):
 
 if __name__ == '__main__':
     finance_profit_loss = WindFinanceProfitLoss()
-    # finance_profit_loss.runwss()
-    finance_profit_loss.uploadToOdps("2018-06-30.csv")
+    finance_profit_loss.runwss()
+    # finance_profit_loss.uploadToOdps("2018-06-30.csv")
