@@ -59,7 +59,7 @@ class WindFinanceProfitLoss(WindBase):
             winddata = self.getProfitLossByWss(v, k)
             filename = self.createCSVFile(self.folder, k_str, fields)
             self.insertToCSV(winddata, k_str, self.folder, filename)
-            # self.uploadToOdps(k_str + '.csv')
+            self.uploadToOdps(k_str + '.csv')
 
     def uploadToOdps(self, filename):
         odps_basic = OdpsClient()

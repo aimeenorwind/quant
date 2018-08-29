@@ -119,6 +119,7 @@ class WindFinanceBalanceSheet(WindBase):
         row_data = [stocklist]
         tday = wssdate.strftime('%Y%m%d')
         options_with_date = self.wss_options % tday
+        print("options_with_date: ", options_with_date)
         for f in self.field:
             wssdata = w.wss(stocklist, f, options_with_date)
             if wssdata.ErrorCode != 0:

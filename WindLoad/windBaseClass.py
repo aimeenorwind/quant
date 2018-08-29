@@ -175,14 +175,14 @@ class WindBase():
                 previous_report_date = None
 
             if previous_report_date == None or previous_report_date < new_report_time.Data[0][i]:
-                print("previous_report.setdefault(stockslist[i]): ", i, previous_report_date,
-                      type(previous_report.setdefault(stockslist[i])))
-                print("new_report_time.Data[0][i]: ", i, new_report_time.Data[0][i], type(new_report_time.Data[0][i]))
+                # print("previous_report.setdefault(stockslist[i]): ", i, previous_report_date,
+                #       type(previous_report.setdefault(stockslist[i])))
+                # print("new_report_time.Data[0][i]: ", i, new_report_time.Data[0][i], type(new_report_time.Data[0][i]))
                 if new_report_stock_dict.setdefault(new_report_time.Data[0][i]) is None:
                     print("新股票。。。")
                     new_report_stock_dict.update({new_report_time.Data[0][i]: [stockslist[i]]})
                 else:
-                    print("添加到list中股票。。。")
+                    #print("添加到list中股票。。。")
                     new_report_stock_dict.setdefault(new_report_time.Data[0][i]).append(stockslist[i])
 
             latest_report.append([stockslist[i], new_report_time.Data[0][i]])

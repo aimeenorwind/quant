@@ -60,9 +60,10 @@ class WindFinanceAnalysis(WindBase):
         row_data = [stocklist]
         tday = wssdate.strftime('%Y%m%d')
         last_year = int(wssdate.year) - 1
-        #print("last_year: ", last_year)
+        print("last_year: ", last_year)
         options_with_date = self.wss_options % (tday, str(last_year))
         for f in self.field:
+            print("wss的参数", stocklist[:5], f, options_with_date)
             wssdata = w.wss(stocklist, f, options_with_date)
             if wssdata.ErrorCode != 0:
                 print(wssdata)
@@ -86,7 +87,7 @@ class WindFinanceAnalysis(WindBase):
             winddata = self.getFinanceAnalysisDataByWss(v, k)
             filename = self.createCSVFile(self.folder, k_str, fields)
             self.insertToCSV(winddata, k_str, self.folder, filename)
-            self.uploadToOdps(k_str + '.csv')
+            #self.uploadToOdps(k_str + '.csv')
 
     def uploadToOdps(self, filename):
         odps_basic = OdpsClient()
